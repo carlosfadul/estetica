@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Estética Canina - Agenda de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e66;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: normal;
+            color: #1e466e;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+        /* Panel formularios */
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 20px 24px;
+            transition: 0.2s;
+            border: 1px solid #eef2f6;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            font-weight: 600;
+            color: #2c3e66;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            border: 1px solid #cfdfed;
+            background: #fff;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+        }
+        .row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        button {
+            background: #8b5cf6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            width: 100%;
+            margin-top: 8px;
+        }
+        button.secondary {
+            background: #e2e8f0;
+            color: #1f2a48;
+        }
+        button.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        button:hover {
+            background: #6d3bc7;
+            transform: translateY(-1px);
+        }
+        .servicios-badge {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+        .servicio-opt {
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .servicio-opt.selected {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+        .citas-lista {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        .cita-item {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 5px solid #8b5cf6;
+            font-size: 0.85rem;
+        }
+        .cita-item strong {
+            color: #1e293b;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-small {
+            background: none;
+            color: #ef4444;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            width: auto;
+            margin-top: 0;
+        }
+        .calendar-header-views {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            justify-content: flex-end;
+        }
+        .view-btn {
+            background: #eef2ff;
+            color: #334155;
+            width: auto;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+        .view-btn.active {
+            background: #8b5cf6;
+            color: white;
+        }
+        @media (max-width: 860px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        .info-mascota {
+            background-color: #fef9e3;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        hr {
+            margin: 16px 0;
+        }
+        .titulo-sec {
+            font-weight: 700;
+            margin: 10px 0 8px;
+            font-size: 1.1rem;
+            color: #2d3e6e;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1>🐾 Estética Canina <small>Control de agenda y clientes</small></h1>
+
+    <div class="main-grid">
+        <!-- Columna izquierda: registro y citas recientes -->
+        <div>
+            <div class="card">
+                <h3 style="margin-top:0;">📝 Registrar mascota & dueño</h3>
+                <div class="form-group">
+                    <label>🐕 Nombre de la mascota *</label>
+                    <input type="text" id="mascotaNombre" placeholder="Ej: Max">
+                </div>
+                <div class="row-2cols">
+                    <div class="form-group"><label>🐾 Raza</label><input type="text" id="raza" placeholder="Labrador, Poodle..."></div>
+                    <div class="form-group"><label>📅 Edad</label><input type="text" id="edad" placeholder="3 años / 6 meses"></div>
+                </div>
+                <div class="form-group"><label>⚠️ Alergias (opcional)</label><textarea id="alergias" rows="1" placeholder="Ej: pollo, pulgas..."></textarea></div>
+                <div class="row-2cols">
+                    <div class="form-group"><label>👤 Dueño (nombre y apellido)</label><input type="text" id="duenioNombre" placeholder="Ana López"></div>
+                    <div class="form-group"><label>📱 Celular</label><input type="tel" id="celular" placeholder="+56 9 1234 5678"></div>
+                </div>
+                <button id="guardarMascotaBtn">💾 Guardar mascota / dueño</button>
+                <div id="mensajeRegistro" style="margin-top: 12px; font-size:0.8rem; color:#2b9348;"></div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>✏️ Agendar nueva cita</h3>
+                <div class="form-group">
+                    <label>Seleccionar mascota registrada</label>
+                    <select id="selectMascota"></select>
+                </div>
+                <div class="form-group">
+                    <label>📅 Fecha y hora</label>
+                    <input type="datetime-local" id="fechaCita">
+                </div>
+                <label>✂️ Servicios</label>
+                <div class="servicios-badge" id="serviciosContainer">
+                    <div class="servicio-opt" data-servicio="Baño">🛁 Baño</div>
+                    <div class="servicio-opt" data-servicio="Peluquería">✂️ Peluquería</div>
+                    <div class="servicio-opt" data-servicio="Corte de uñas">💅 Corte de uñas</div>
+                </div>
+                <input type="hidden" id="serviciosSeleccionados" value="">
+                <button id="agendarCitaBtn">📆 Agendar cita</button>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>📋 Próximas citas (próximos 7 días)</h3>
+                <div id="listaProximasCitas" class="citas-lista">
+                    <div style="color: gray;">No hay citas próximas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: calendario FullCalendar -->
+        <div class="card" style="padding: 16px;">
+            <div class="calendar-header-views">
+                <button id="vistaDiariaBtn" class="view-btn">🗓️ Vista Día</button>
+                <button id="vistaSemanalBtn" class="view-btn active">📆 Vista Semana</button>
+            </div>
+            <div id="calendario"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // -------- MODELO DE DATOS (almacenado en localStorage) --------
+    // Mascotas: cada mascota tiene id, nombre, raza, edad, alergias, duenioNombre, duenioCelular
+    let mascotas = [];
+    // Citas: { id, mascotaId, fechaISO, serviciosArray, timestamp }
+    let citas = [];
+
+    // Cargar datos desde localStorage
+    function cargarDatos() {
+        const storedMascotas = localStorage.getItem('estetica_mascotas');
+        const storedCitas = localStorage.getItem('estetica_citas');
+        if(storedMascotas) mascotas = JSON.parse(storedMascotas);
+        if(storedCitas) citas = JSON.parse(storedCitas);
+        if(mascotas.length === 0) {
+            // Datos de ejemplo para demostración
+            mascotas = [
+                { id: "1", nombre: "Luna", raza: "Golden", edad: "2 años", alergias: "Ninguna", duenioNombre: "Carlos Pérez", duenioCelular: "555-1234" },
+                { id: "2", nombre: "Toby", raza: "Shih Tzu", edad: "4 años", alergias: "Pulgas", duenioNombre: "María Gómez", duenioCelular: "555-5678" }
+            ];
+            citas = [
+                { id: "c1", mascotaId: "1", fechaISO: obtenerFechaEjemplo(1), servicios: ["Baño", "Corte de uñas"], timestamp: new Date(obtenerFechaEjemplo(1)).getTime() },
+                { id: "c2", mascotaId: "2", fechaISO: obtenerFechaEjemplo(2), servicios: ["Peluquería"], timestamp: new Date(obtenerFechaEjemplo(2)).getTime() }
+            ];
+            guardarTodo();
+        }
+        actualizarSelectMascotas();
+        renderizarCalendario();  // inicial
+        actualizarProximasCitas();
+    }
+
+    function obtenerFechaEjemplo(diasOffset) {
+        let fecha = new Date();
+        fecha.setDate(fecha.getDate() + diasOffset);
+        fecha.setHours(10, 0, 0, 0);
+        return fecha.toISOString().slice(0,16);
+    }
+
+    function guardarTodo() {
+        localStorage.setItem('estetica_mascotas', JSON.stringify(mascotas));
+        localStorage.setItem('estetica_citas', JSON.stringify(citas));
+    }
+
+    function actualizarSelectMascotas() {
+        const select = document.getElementById('selectMascota');
+        if(!select) return;
+        select.innerHTML = '<option value="">-- Seleccionar mascota --</option>';
+        mascotas.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = `${m.nombre} (${m.raza || '?'}) - Dueño: ${m.duenioNombre}`;
+            select.appendChild(option);
+        });
+    }
+
+    // servicios UI toggle
+    let serviciosActivos = []; // strings
+    function actualizarUIServicios() {
+        document.querySelectorAll('.servicio-opt').forEach(el => {
+            const servicio = el.getAttribute('data-servicio');
+            if(serviciosActivos.includes(servicio)) {
+                el.classList.add('selected');
+            } else {
+                el.classList.remove('selected');
+            }
+        });
+        document.getElementById('serviciosSeleccionados').value = serviciosActivos.join(',');
+    }
+    document.querySelectorAll('.servicio-opt').forEach(el => {
+        el.addEventListener('click', () => {
+            const servicio = el.getAttribute('data-servicio');
+            if(serviciosActivos.includes(servicio)) {
+                serviciosActivos = serviciosActivos.filter(s => s !== servicio);
+            } else {
+                serviciosActivos.push(servicio);
+            }
+            actualizarUIServicios();
+        });
+    });
+
+    // Guardar mascota
+    document.getElementById('guardarMascotaBtn').addEventListener('click', () => {
+        const nombre = document.getElementById('mascotaNombre').value.trim();
+        const raza = document.getElementById('raza').value.trim();
+        const edad = document.getElementById('edad').value.trim();
+        const alergias = document.getElementById('alergias').value.trim();
+        const duenioNombre = document.getElementById('duenioNombre').value.trim();
+        const celular = document.getElementById('celular').value.trim();
+
+        if(!nombre) {
+            mostrarMensaje('registro', '⚠️ El nombre de la mascota es obligatorio', 'error');
+            return;
+        }
+        if(!duenioNombre) {
+            mostrarMensaje('registro', '⚠️ Ingrese nombre del dueño', 'error');
+            return;
+        }
+        const nuevaMascota = {
+            id: Date.now().toString(),
+            nombre,
+            raza: raza || 'No especificada',
+            edad: edad || 'Desconocida',
+            alergias: alergias || 'Ninguna',
+            duenioNombre,
+            duenioCelular: celular || 'No registrado'
+        };
+        mascotas.push(nuevaMascota);
+        guardarTodo();
+        actualizarSelectMascotas();
+        limpiarFormularioMascota();
+        mostrarMensaje('registro', `✅ Mascota "${nombre}" registrada correctamente`, 'ok');
+        // refrescar calendario por si se muestran datos de mascotas en tooltip? No necesario pero actualiza selects
+        renderizarCalendario(); // por si se muestra info adicional
+    });
+
+    function limpiarFormularioMascota() {
+        document.getElementById('mascotaNombre').value = '';
+        document.getElementById('raza').value = '';
+        document.getElementById('edad').value = '';
+        document.getElementById('alergias').value = '';
+        document.getElementById('duenioNombre').value = '';
+        document.getElementById('celular').value = '';
+    }
+
+    function mostrarMensaje(contexto, texto, tipo) {
+        const div = document.getElementById('mensajeRegistro');
+        if(div) {
+            div.style.color = tipo === 'error' ? '#b91c1c' : '#2b9348';
+            div.innerText = texto;
+            setTimeout(() => { if(div) div.innerText = ''; }, 3000);
+        } else {
+            alert(texto);
+        }
+    }
+
+    // Agendar cita
+    document.getElementById('agendarCitaBtn').addEventListener('click', () => {
+        const mascotaId = document.getElementById('selectMascota').value;
+        if(!mascotaId) {
+            alert('Debe seleccionar una mascota registrada');
+            return;
+        }
+        const fechaRaw = document.getElementById('fechaCita').value;
+        if(!fechaRaw) {
+            alert('Seleccione fecha y hora para la cita');
+            return;
+        }
+        if(serviciosActivos.length === 0) {
+            alert('Seleccione al menos un servicio (Baño, Peluquería, Corte de uñas)');
+            return;
+        }
+        // Validar que la fecha no esté en el pasado muy estricto? se permite mismo día futuro.
+        const fechaCitaObj = new Date(fechaRaw);
+        if(isNaN(fechaCitaObj.getTime())) {
+            alert('Fecha inválida');
+            return;
+        }
+        // Validar superposición? Opcional simple: avisar si ya existe otra cita misma mascota misma hora? se puede pero no obligatorio
+        const nuevaCita = {
+            id: Date.now().toString() + Math.random(),
+            mascotaId: mascotaId,
+            fechaISO: fechaRaw,
+            servicios: [...serviciosActivos],
+            timestamp: fechaCitaObj.getTime()
+        };
+        citas.push(nuevaCita);
+        // ordenar por fecha
+        citas.sort((a,b) => a.timestamp - b.timestamp);
+        guardarTodo();
+        // reset servicios seleccionados
+        serviciosActivos = [];
+        actualizarUIServicios();
+        document.getElementById('fechaCita').value = '';
+        renderizarCalendario();
+        actualizarProximasCitas();
+        alert('Cita agendada con éxito');
+    });
+
+    // Eliminar cita
+    function eliminarCita(idCita) {
+        if(confirm('¿Eliminar esta cita permanentemente?')) {
+            citas = citas.filter(c => c.id !== idCita);
+            guardarTodo();
+            renderizarCalendario();
+            actualizarProximasCitas();
+        }
+    }
+
+    // Obtener nombre mascota por id
+    function getMascotaById(id) {
+        return mascotas.find(m => m.id === id) || null;
+    }
+
+    // Renderizar próximas citas (7 días)
+    function actualizarProximasCitas() {
+        const container = document.getElementById('listaProximasCitas');
+        if(!container) return;
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        const limite = new Date();
+        limite.setDate(hoy.getDate() + 7);
+        limite.setHours(23,59,59,999);
+
+        const proximas = citas.filter(c => {
+            const fechaC = new Date(c.fechaISO);
+            return fechaC >= hoy && fechaC <= limite;
+        }).sort((a,b) => a.timestamp - b.timestamp);
+
+        if(proximas.length === 0) {
+            container.innerHTML = '<div style="color: gray;">✨ No hay citas en los próximos 7 días</div>';
+            return;
+        }
+        container.innerHTML = '';
+        proximas.forEach(c => {
+            const masc = getMascotaById(c.mascotaId);
+            if(!masc) return;
+            const fechaForm = new Date(c.fechaISO);
+            const fechaStr = fechaForm.toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+            const div = document.createElement('div');
+            div.className = 'cita-item';
+            div.innerHTML = `
+                <div class="flex-between">
+                    <strong>🐶 ${masc.nombre}</strong>
+                    <button class="btn-small eliminar-cita" data-id="${c.id}">🗑️</button>
+                </div>
+                <div>📅 ${fechaStr}</div>
+                <div>✂️ Servicios: ${c.servicios.join(', ')}</div>
+                <div class="info-mascota">👤 Dueño: ${masc.duenioNombre} | 📞 ${masc.duenioCelular}</div>
+            `;
+            container.appendChild(div);
+        });
+        document.querySelectorAll('.eliminar-cita').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                eliminarCita(id);
+            });
+        });
+    }
+
+    // Calendario con FullCalendar
+    let calendar = null;
+    let currentView = 'timeGridWeek'; // 'timeGridDay' o 'timeGridWeek'
+
+    function renderizarCalendario() {
+        const calendarEl = document.getElementById('calendario');
+        if(!calendarEl) return;
+        if(calendar) {
+            calendar.destroy();
+        }
+        const vistaInicial = currentView;
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'es',
+            initialView: vistaInicial,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            views: {
+                timeGridWeek: { buttonText: 'Semana' },
+                timeGridDay: { buttonText: 'Día' }
+            },
+            slotMinTime: '08:00:00',
+            slotMaxTime: '20:00:00',
+            allDaySlot: false,
+            events: obtenerEventosCalendario(),
+            eventClick: (info) => {
+                const citaId = info.event.extendedProps.citaId;
+                if(citaId) {
+                    if(confirm(`¿Eliminar cita de ${info.event.title}?`)) {
+                        eliminarCita(citaId);
+                    }
+                }
+            },
+            eventDidMount: (info) => {
+                // tooltip personalizado
+                const citaId = info.event.extendedProps.citaId;
+                if(citaId) {
+                    const cita = citas.find(c => c.id === citaId);
+                    if(cita) {
+                        const masc = getMascotaById(cita.mascotaId);
+                        if(masc) {
+                            let tooltip = `Dueño: ${masc.duenioNombre}\nCel: ${masc.duenioCelular}\nServicios: ${cita.servicios.join(', ')}`;
+                            if(masc.alergias && masc.alergias !== 'Ninguna') tooltip += `\n⚠️ Alergias: ${masc.alergias}`;
+                            info.el.setAttribute('title', tooltip);
+                        }
+                    }
+                }
+            }
+        });
+        calendar.render();
+    }
+
+    function obtenerEventosCalendario() {
+        const eventos = [];
+        citas.forEach(cita => {
+            const mascota = getMascotaById(cita.mascotaId);
+            if(!mascota) return;
+            const fechaInicio = new Date(cita.fechaISO);
+            if(isNaN(fechaInicio)) return;
+            // duración 1 hora por defecto
+            const fechaFin = new Date(fechaInicio.getTime() + 60*60*1000);
+            const titulo = `${mascota.nombre} - ${cita.servicios.join(', ')}`;
+            eventos.push({
+                id: cita.id,
+                title: titulo,
+                start: fechaInicio,
+                end: fechaFin,
+                extendedProps: { citaId: cita.id, mascotaId: cita.mascotaId },
+                backgroundColor: '#8b5cf6',
+                borderColor: '#6d3bc7'
+            });
+        });
+        return eventos;
+    }
+
+    function cambiarVista(vista) {
+        currentView = vista;
+        if(calendar) {
+            calendar.changeView(vista);
+        } else {
+            renderizarCalendario();
+        }
+        // actualizar estilo botones
+        document.getElementById('vistaDiariaBtn').classList.remove('active');
+        document.getElementById('vistaSemanalBtn').classList.remove('active');
+        if(vista === 'timeGridDay') document.getElementById('vistaDiariaBtn').classList.add('active');
+        else document.getElementById('vistaSemanalBtn').classList.add('active');
+    }
+
+    // inicializar y sincronizar cambios
+    function refreshAll() {
+        if(calendar) {
+            calendar.refetchEvents();
+        } else {
+            renderizarCalendario();
+        }
+        actualizarProximasCitas();
+        actualizarSelectMascotas();
+    }
+
+    // Vista diaria y semanal listeners
+    document.getElementById('vistaDiariaBtn').addEventListener('click', () => cambiarVista('timeGridDay'));
+    document.getElementById('vistaSemanalBtn').addEventListener('click', () => cambiarVista('timeGridWeek'));
+
+    // Observador cambios en localStorage por si otras pestañas? no necesario pero simple
+    window.addEventListener('storage', (e) => {
+        if(e.key === 'estetica_mascotas' || e.key === 'estetica_citas') {
+            cargarDatos();
+            refreshAll();
+        }
+    });
+
+    // Inicializar app
+    cargarDatos();
+    // refrescar cada vez que se actualiza cualquier evento
+    function hookGuardarYCambios() {
+        const originalGuardar = guardarTodo;
+        window.guardarTodo = function() {
+            originalGuardar();
+            refreshAll();
+        };
+    }
+    // sobreescribir guardarTodo para refresh automático
+    const originalGuardar = guardarTodo;
+    window.guardarTodo = function() {
+        originalGuardar();
+        refreshAll();
+    };
+    guardarTodo = function() {
+        localStorage.setItem('estetica_mascotas', JSON.stringify(mascotas));
+        localStorage.setItem('estetica_citas', JSON.stringify(citas));
+        refreshAll();
+    };
+    // refrescar después de cada mutación
+    const methods = [actualizarSelectMascotas, renderizarCalendario, actualizarProximasCitas];
+    setInterval(() => {
+        // sincronización pasiva
+        const storedM = localStorage.getItem('estetica_mascotas');
+        const storedC = localStorage.getItem('estetica_citas');
+        if(storedM) {
+            let newM = JSON.parse(storedM);
+            let newC = JSON.parse(storedC);
+            if(JSON.stringify(mascotas) !== JSON.stringify(newM) || JSON.stringify(citas) !== JSON.stringify(newC)) {
+                mascotas = newM;
+                citas = newC;
+                refreshAll();
+            }
+        }
+    }, 2000);
+    // force inicial
+    setTimeout(() => refreshAll(), 100);
+</script>
+</body>
+</html>
